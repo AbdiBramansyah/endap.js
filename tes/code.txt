@@ -1,0 +1,74 @@
+# =================LIBRARY
+import psutil
+import time
+import numpy as np
+import math
+# =========================
+
+# =======METODE BISECTION
+xl = float(input("Masukkan batas bawah = ")) #selang interval
+xn = float(input("Masukkan batas atas = "))
+toleransi = 0.000001 #Agar program berhenti
+iterasi = 0
+
+# ======PERFORMA AWAL LAPTOP
+cpu_awal = psutil.cpu_percent(interval=0.1)
+ram_awal = psutil.virtual_memory().percent
+waktu_awal = time.perf_counter()
+# =========================
+
+while True:
+
+    xl0 = (xl/180)*3.14 #konversi dari derajat ke radian
+    xn0 = (xn/180)*3.14
+
+    iterasi = iterasi + 1
+
+    xc = (xl + xn) / 2 #Titik tengah
+    xc0 = (xc/180)*3.14
+
+    fxl0 = 60*np.tan(xl0) - 23.184*(1/np.cos(xl0))**2 - 0.5
+    fxn0 = 60*np.tan(xn0) - 23.184*(1/np.cos(xn0))**2 - 0.5
+    fxc0 = 60*np.tan(xc0) - 23.184*(1/np.cos(xc0))**2 - 0.5
+    
+    print(f"xl = {xl}")
+    print(f"xn = {xn}")
+    print(f"xc = {xc}")
+    print(f"f(x) = {fxc0}")
+    print(f"Jumlah iterasi = {iterasi}")
+    print()
+
+    if fxl0 * fxn0 > 0: #Batas iterasi
+        break
+
+    if fxc0 < toleransi: #Syarat bisection
+        break
+
+    if fxc0 > 0: 
+        xl = xc
+
+    else:
+        xn = xc
+# =========================
+
+# ======PERFORMA AKHIR LAPTOP
+waktu_akhir = time.perf_counter()
+cpu_akhir = psutil.cpu_percent(interval=0.1)
+ram_akhir = psutil.virtual_memory().percent
+# =========================
+
+# ===========# HASIL
+print(f"f(x) = 60*np.tan(x) - 23.184*(1/np.cos(x))**2 - 0.5")
+print(f"Akar ≈ {xc}")
+print(f"f(Akar)) = {fxc0}")
+print()
+
+print("=== PERFORMA LAPTOP ===")
+print(f"Waktu eksekusi : {waktu_akhir - waktu_awal:.6f} detik")
+print(f"CPU awal       :{cpu_awal}%")
+print(f"CPU akhir      : {cpu_akhir}%")
+print(f"RAM awal       :{ram_awal}%")
+print(f"RAM akhir      : {ram_akhir}%")
+# =========================
+
+#Abdi Bramansyah 18/09/2026
