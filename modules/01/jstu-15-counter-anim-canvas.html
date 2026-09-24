@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Belajar JavaScript</title>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script>
+function createAnimationCanvas() {
+  let can = document.createElement("canvas");
+    
+  can.width = width;
+  can.style.width = width + "px";
+  
+  can.height = height;
+  can.style.height = height + "px";
+  
+  return can;
+}
+
+function createToggleButton(cap1, cap2, funct) {
+  let btn = document.createElement("button");
+  btn.innerHTML = cap1;
+  
+  btn.style.width = "60px";
+  btn.style.height = "20px";
+  btn.style.display = "block";
+  btn.style.marginBottom = "4px";
+  
+  btn.addEventListener("click", () => {
+    
+    let newCap = "";
+    let oldCap = event.target.innerHTML;
+    if(oldCap == cap1) {
+      console.log(oldCap);
+      newCap = cap2;
+      counterId = setInterval(funct, delay_ms)
+    } else {
+      console.log(oldCap);
+      newCap = cap1;
+      clearInterval(counterId);
+    }
+    event.target.innerHTML = newCap;
+  });
+  
+  return btn;
+}
+
+function animate() {
+  console.log("Animate");
+  
+  const dirMin = -1;
+  const dirMax = 1;
+  const dirDif = (dirMax - dirMin);
+  
+  let dx = Math.round(Math.random() * dirDif) + dirMin;
+  sx.push(dx);
+    
+  let dy = Math.round(Math.random() * dirDif) + dirMin;
+  sy.push(dy);
+      
+  if(sx.length == 1 && sy.length == 1) {
+    x1 = width / 2;
+    y1 = height / 2;
+    i = 0;
+  } else {
+    x2 = x1 + sx[i] * ds;
+    y2 = y1 + sy[i] * ds;
+    
+    let jump = false;
+    if(x2 > width) {
+      x2 -= width;
+      jump = true;
+    }
+    if(x2 < 0) {
+      x2 += width;
+      jump = true;
+    }
+    
+    if(y2 > height) {
+      y2 -= height;
+      jump = true;
+    }
+    if(y2 < 0) {
+      y2 += height;
+      jump = true;
+    }
+    
+    const ctx = can.getContext("2d");
+    ctx.strokeStyle = colors[colorId];  
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    if(!jump) {
+      ctx.lineTo(x2, y2);
+    } else {
+      ctx.moveTo(x2, y2);
+      colorId++;
+      if(colorId > 6) colorId = 0;
+    }
+    ctx.stroke();
+    
+    x1 = x2;
+    y1 = y2;
+    
+    i += 1;
+  }
+}
+
+// get container object
+let cnt = document.getElementById("container");
+cnt.style.paddingTop = "0.5em";
+
+// create global variables
+const width = 200;
+const height = 200;
+const delay_ms = 2;
+let counterId;
+let sx = [];
+let sy = [];
+let i, x1, y1, x2, y2;
+const ds = 4;
+let colorId = 0;
+const colors = ["#f00", "#00f", "#0f0", "#ff0", "#f0f", "#0ff", "#fff"];
+
+// create elements
+let btn = createToggleButton("Start", "Stop", animate);
+let can = createAnimationCanvas();
+
+// attach elements to container
+cnt.append(btn);
+cnt.append(can);
+</script>
+
+</body>
+</html>
