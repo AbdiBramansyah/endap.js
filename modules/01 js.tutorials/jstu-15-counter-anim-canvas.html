@@ -1,13 +1,27 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang=en-us dir=ltr>
 <head>
-    <title>Belajar JavaScript</title>
+  <link rel='stylesheet' href="/assets/css/style.css">
 </head>
 <body>
+<!-- code begins -->
 
-<div id="container"></div>
 
-<script>
+<script src="/libs/chartjs/4.5.1/chart.umd.min.js" defer></script>
+<script type="importmap">
+{
+  "imports": {
+    "endap": "/libs/endap/0.0.3/endap.min.js"
+  }
+}
+</script>
+
+
+<div id="container">
+</div>
+
+
+<script type=module>
 function createAnimationCanvas() {
   let can = document.createElement("canvas");
     
@@ -121,8 +135,8 @@ let sx = [];
 let sy = [];
 let i, x1, y1, x2, y2;
 const ds = 4;
-let colorId = 0;
-const colors = ["#f00", "#00f", "#0f0", "#ff0", "#f0f", "#0ff", "#fff"];
+colorId = 0;
+colors = ["#f00", "#00f", "#0f0", "#ff0", "#f0f", "#0ff", "#fff"];
 
 // create elements
 let btn = createToggleButton("Start", "Stop", animate);
@@ -131,7 +145,10 @@ let can = createAnimationCanvas();
 // attach elements to container
 cnt.append(btn);
 cnt.append(can);
+
 </script>
 
+
+<!-- code ends -->
 </body>
 </html>

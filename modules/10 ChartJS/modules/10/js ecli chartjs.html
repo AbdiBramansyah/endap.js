@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang=en-us dir=ltr>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>js ecli chartjs</title>
+  <link rel='stylesheet' href="/assets/css/style.css">
+</head>
+<body>
+<!-- code begins -->
+
+
+<script src="/libs/chartjs/4.5.1/chart.umd.min.js" defer></script>
+<script type="importmap">
+{
+  "imports": {
+    "endap": "/libs/endap/0.0.5/endap.min.js"
+  }
+}
+</script>
+
+
+<h2>minimalist</h2>
+
+<div id="cnt1"></div>
+
+
+<script type="module">
+
+/*
+  elements
+*/
+
+const cnt = document.getElementById("cnt1");
+Object.assign(cnt.style, {
+  border: "0px solid green",
+  height: "200px",
+  display: "flex",
+});
+
+const div = document.createElement("div");
+Object.assign(div.style, {
+  border: "0px solid blue",
+  flex: 1,
+  display: "flex",
+  marginRight: "10px",
+});
+
+const can = document.createElement("canvas");
+Object.assign(can.style, {
+  flex: 2,
+  border: "1px solid var(--muted-border)",
+});
+
+
+/*
+  console
+*/
+
+import { Console as CLI } from "endap"
+
+const consoles = CLI.create("78%");
+const cli = consoles.el;
+Object.assign(cli.style, {
+  flex: 1,
+});
+consoles.setTitle("data-1");
+
+
+/*
+  data
+*/
+
+import { Tensor1D as T1D } from "endap"
+
+const n = 4;
+const x1 = T1D.create(n);
+const x2 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  x1[i] = 2 * i;
+  x2[i] = i * i;
+}
+
+const data1 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const point = {
+    x: x1[i],
+    y: x2[i],
+  };
+  data1[i] = point;
+}
+
+
+/*
+  output to cli
+*/
+
+consoles.log("x1\tx2");
+for(let i = 0; i < n; i++) {
+  const x1s = x1[i].toFixed(3);
+  const x2s = x2[i].toFixed(3);
+
+  consoles.log(x1s, "\t");
+  consoles.log(x2s);
+}
+
+
+/*
+  output to canvas with chartjs
+*/
+
+const config = {
+  type: 'scatter',
+
+  data: {
+    datasets: [
+      {
+        label: "data-1",
+        data: data1,
+        radius: 4,
+        hoverRadius: 6,
+        showLine: true,
+      },
+    ],
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    scales: {
+
+      x: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x1',
+          font: { size: 14, },
+        },
+      },
+
+      y: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x2',
+          font: { size: 14, },
+        },
+      },
+
+    },
+  },
+
+};
+const chart = new Chart(can, config);
+
+
+/*
+  layouts
+*/
+
+cnt.append(div);
+  div.append(cli);
+cnt.append(can);
+
+</script>
+
+
+<h2>sine curve</h2>
+
+<div id="cnt2"></div>
+
+
+<script type="module">
+
+/*
+  elements
+*/
+
+const cnt = document.getElementById("cnt2");
+Object.assign(cnt.style, {
+  border: "0px solid green",
+  height: "200px",
+  display: "flex",
+});
+
+const div = document.createElement("div");
+Object.assign(div.style, {
+  border: "0px solid blue",
+  flex: 1,
+  display: "flex",
+  marginRight: "10px",
+});
+
+const can = document.createElement("canvas");
+Object.assign(can.style, {
+  flex: 2,
+  border: "1px solid var(--muted-border)",
+});
+
+
+/*
+  console
+*/
+
+import { Console as CLI } from "endap"
+
+const consoles = CLI.create("78%");
+const cli = consoles.el;
+Object.assign(cli.style, {
+  flex: 1,
+});
+consoles.setTitle("sine data");
+
+
+/*
+  data
+*/
+
+import { Tensor1D as T1D } from "endap"
+
+const A = 0.1;
+const T = 2;
+const phi0 = 0;
+const omega = 2 * Math.PI / T;
+
+const tbeg = 0;
+const tend = 4;
+const dt = 0.1;
+
+const n = (tend - tbeg) / dt;
+const x1 = T1D.create(n);
+const x2 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const t = tbeg + i * dt;
+  const x = Math.sin(omega * t + phi0);
+  x1[i] = t;
+  x2[i] = x;
+}
+
+const data1 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const point = {
+    x: x1[i],
+    y: x2[i],
+  };
+  data1[i] = point;
+}
+
+
+/*
+  output to cli
+*/
+
+consoles.log("x1\tx2");
+for(let i = 0; i < n; i++) {
+  const x1s = x1[i].toFixed(3);
+  const x2s = x2[i].toFixed(3);
+
+  consoles.log(x1s, "\t");
+  consoles.log(x2s);
+}
+
+
+/*
+  output to canvas with chartjs
+*/
+
+const config = {
+  type: 'scatter',
+
+  data: {
+    datasets: [
+      {
+        label: "sine",
+        data: data1,
+        radius: 4,
+        hoverRadius: 6,
+        showLine: true,
+      },
+    ],
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    scales: {
+
+      x: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x1',
+          font: { size: 14, },
+        },
+      },
+
+      y: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x2',
+          font: { size: 14, },
+        },
+      },
+
+    },
+  },
+
+};
+const chart = new Chart(can, config);
+
+
+/*
+  layouts
+*/
+
+cnt.append(div);
+  div.append(cli);
+cnt.append(can);
+
+</script>
+
+
+<h2>parabolic curve</h2>
+
+<div id="cnt3"></div>
+
+
+<script type="module">
+
+/*
+  elements
+*/
+
+const cnt = document.getElementById("cnt3");
+Object.assign(cnt.style, {
+  border: "0px solid green",
+  height: "200px",
+  display: "flex",
+});
+
+const div = document.createElement("div");
+Object.assign(div.style, {
+  border: "0px solid blue",
+  flex: 1,
+  display: "flex",
+  marginRight: "10px",
+});
+
+const can = document.createElement("canvas");
+Object.assign(can.style, {
+  flex: 2,
+  border: "1px solid var(--muted-border)",
+});
+
+
+/*
+  console
+*/
+
+import { Console as CLI } from "endap"
+
+const consoles = CLI.create("78%");
+const cli = consoles.el;
+Object.assign(cli.style, {
+  flex: 1,
+});
+consoles.setTitle("parabolic data");
+
+
+/*
+  data
+*/
+
+import { Tensor1D as T1D } from "endap"
+
+const x0 = 0;
+const y0 = 0;
+const v0x = 20;
+const v0y = 40;
+const ax = 0;
+const ay = -10;
+
+const tbeg = 0;
+const tend = 8;
+const dt = 0.5;
+
+const n = (tend - tbeg) / dt;
+const x1 = T1D.create(n);
+const x2 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const t = tbeg + i * dt;
+  const x = x0 + v0x * t + 0.5 * ax * t * t;
+  const y = y0 + v0y * t + 0.5 * ay * t * t;
+  x1[i] = x;
+  x2[i] = y;
+}
+
+const data1 = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const point = {
+    x: x1[i],
+    y: x2[i],
+  };
+  data1[i] = point;
+}
+
+
+/*
+  output to cli
+*/
+
+consoles.log("x1\tx2");
+for(let i = 0; i < n; i++) {
+  const x1s = x1[i].toFixed(3);
+  const x2s = x2[i].toFixed(3);
+
+  consoles.log(x1s, "\t");
+  consoles.log(x2s);
+}
+
+
+/*
+  output to canvas with chartjs
+*/
+
+const config = {
+  type: 'scatter',
+
+  data: {
+    datasets: [
+      {
+        label: "parabolic",
+        data: data1,
+        radius: 4,
+        hoverRadius: 6,
+        showLine: true,
+      },
+    ],
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    scales: {
+
+      x: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x1',
+          font: { size: 14, },
+        },
+      },
+
+      y: {
+        type: 'linear',
+        title: {
+          display: true,
+          text: 'x2',
+          font: { size: 14, },
+        },
+      },
+
+    },
+  },
+
+};
+const chart = new Chart(can, config);
+
+
+/*
+  layouts
+*/
+
+cnt.append(div);
+  div.append(cli);
+cnt.append(can);
+
+</script>
+
+
+<h2>parabolic motion: x&minus;t, y&minus;t, y&minus;x</h2>
+
+<p>
+  The x&minus;t plot is linear because v<sub>x</sub> is constant, with slope
+  v<sub>0x</sub> = 20. The y&minus;t plot is quadratic because a<sub>y</sub>
+  is constant; it peaks at t = 4 s (y = 80) and returns to y = 0 at t = 8 s.
+  Eliminating t gives the trajectory
+  y(x) = (v<sub>0y</sub>/v<sub>0x</sub>)x &minus;
+  (|a<sub>y</sub>|/(2v<sub>0x</sub><sup>2</sup>))x<sup>2</sup>
+  = 2x &minus; x<sup>2</sup>/80, which is the y&minus;x plot.
+</p>
+
+<div id="cnt4"></div>
+<div id="cnt5"></div>
+<div id="cnt6"></div>
+
+
+<script type="module">
+
+import { Console as CLI } from "endap";
+import { Tensor1D as T1D } from "endap";
+
+const x0 = 0;
+const y0 = 0;
+const v0x = 20;
+const v0y = 40;
+const ax = 0;
+const ay = -10;
+
+const tbeg = 0;
+const tend = 8;
+const dt = 0.5;
+
+const n = (tend - tbeg) / dt + 1;
+const t = T1D.create(n);
+const x = T1D.create(n);
+const y = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  const ti = tbeg + i * dt;
+  t[i] = ti;
+  x[i] = x0 + v0x * ti + 0.5 * ax * ti * ti;
+  y[i] = y0 + v0y * ti + 0.5 * ay * ti * ti;
+}
+
+const xt = T1D.create(n);
+const yt = T1D.create(n);
+const xy = T1D.create(n);
+
+for(let i = 0; i < n; i++) {
+  xt[i] = { x: t[i], y: x[i] };
+  yt[i] = { x: t[i], y: y[i] };
+  xy[i] = { x: x[i], y: y[i] };
+}
+
+function addPlot(containerId, title, xLabel, yLabel, label, points) {
+  const cnt = document.getElementById(containerId);
+  Object.assign(cnt.style, {
+    height: "200px",
+    display: "flex",
+    marginBottom: "12px",
+  });
+
+  const div = document.createElement("div");
+  Object.assign(div.style, {
+    flex: 1,
+    display: "flex",
+    marginRight: "10px",
+  });
+
+  const can = document.createElement("canvas");
+  Object.assign(can.style, {
+    flex: 2,
+    border: "1px solid var(--muted-border)",
+  });
+
+  const consoles = CLI.create("78%");
+  const cli = consoles.el;
+  Object.assign(cli.style, {
+    flex: 1,
+  });
+  consoles.setTitle(title);
+
+  cnt.append(div);
+    div.append(cli);
+  cnt.append(can);
+
+  consoles.log(xLabel + "\t" + yLabel);
+  for(let i = 0; i < points.length; i++) {
+    const xs = points[i].x.toFixed(3);
+    const ys = points[i].y.toFixed(3);
+    consoles.log(xs + "\t" + ys);
+  }
+
+  const config = {
+    type: 'scatter',
+
+    data: {
+      datasets: [
+        {
+          label: label,
+          data: points,
+          radius: 4,
+          hoverRadius: 6,
+          showLine: true,
+        },
+      ],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      scales: {
+
+        x: {
+          type: 'linear',
+          title: {
+            display: true,
+            text: xLabel,
+            font: { size: 14, },
+          },
+        },
+
+        y: {
+          type: 'linear',
+          title: {
+            display: true,
+            text: yLabel,
+            font: { size: 14, },
+          },
+        },
+
+      },
+    },
+
+  };
+
+  new Chart(can, config);
+}
+
+addPlot("cnt4", "data x-t", "t", "x", "data x-t", xt);
+addPlot("cnt5", "data y-t", "t", "y", "data y-t", yt);
+addPlot("cnt6", "data x-y", "x", "y", "data x-y", xy);
+
+</script>
+
+
+<!-- code ends -->
+</body>
+</html>

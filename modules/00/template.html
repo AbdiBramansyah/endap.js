@@ -22,20 +22,13 @@
 
 
 <script type=module>
-import { Console as CLI } from "endap";
-import { RandNum as RNU } from "endap";
-
+import { Console as CLI } from "endap"
 const consoles = CLI.create("40px");
 
-const cnt = document.getElementById("cnt0");
+const cnt = document.getElementById("cnt1");
 cnt.append(consoles.el);
 
-const min = 10;
-const max = 90
-const n = 10;
-const x = RNU.randIntN(min, max, n);
-consoles.log("x = ", "");
-consoles.log(x);
+consoles.ver();
 </script>
 
 <pre class="mermaid">
