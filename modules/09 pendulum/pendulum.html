@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang=en-us dir=ltr>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pendulum: small-angle vs numerical</title>
+  <link rel='stylesheet' href="/assets/css/style.css">
+  <style>
+    .pendulum-table {
+      border-collapse: collapse;
+      margin: 1rem 0;
+      width: 100%;
+    }
+
+    .pendulum-table th,
+    .pendulum-table td {
+      border-bottom: 1px solid var(--muted-border);
+      padding: 0.25rem 0.5rem;
+      text-align: right;
+    }
+
+    .pendulum-table th:first-child,
+    .pendulum-table td:first-child {
+      text-align: left;
+    }
+
+    .pendulum-case {
+      margin-bottom: 1.5rem;
+    }
+
+    .pendulum-row {
+      display: flex;
+      height: 220px;
+    }
+
+    .pendulum-console {
+      flex: 1;
+      margin-right: 10px;
+      min-width: 0;
+    }
+
+    .pendulum-chart {
+      flex: 2;
+      min-width: 0;
+      position: relative;
+    }
+
+    .pendulum-chart canvas {
+      border: 1px solid var(--muted-border);
+    }
+
+    @media (max-width: 600px) {
+      .pendulum-row {
+        flex-direction: column;
+        height: auto;
+        gap: 10px;
+      }
+
+      .pendulum-console {
+        margin-right: 0;
+      }
+
+      .pendulum-chart {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- code begins -->
+
+
+<script src="/libs/chartjs/4.5.1/chart.umd.min.js" defer></script>
+<script type="importmap">
+{
+  "imports": {
+    "endap": "/libs/endap/0.0.5/endap.min.js"
+  }
+}
+</script>
+
+
+<h1>Pendulum: small-angle approximation vs numerical solution</h1>
+
+<p>
+  The small-angle solution is
+  <i>&theta;</i><sub>the</sub>(<i>t</i>) =
+  <i>A</i> cos(<i>&omega;</i><sub>0</sub><i>t</i>)
+  with <i>&omega;</i><sub>0</sub> = &radic;(<i>g</i>/<i>R</i>).
+  The numerical solution integrates
+  <i>&theta;</i>&Prime; = &minus;(<i>g</i>/<i>R</i>) sin <i>&theta;</i>
+  using semi-implicit Euler. The amplitude is <i>A</i> = <i>a</i>&pi;,
+  for <i>a</i> = 0.1, 0.2, &hellip;, 0.9, 0.99.
+</p>
+
+<div id="summary"></div>
+
+<div id="cases"></div>
+
+<p>
+  For small <i>a</i> the two curves nearly coincide. As <i>a</i> increases,
+  the nonlinear period becomes longer than <i>T</i><sub>0</sub> = 2&pi;/<i>&omega;</i><sub>0</sub>,
+  so the numerical curve gradually drifts out of phase with the
+  small-angle solution.
+</p>
+
+
+<script type="module">
+import { Console as CLI } from "endap"
+
+
+/* params */
+
+const T0 = 1;
+const tbeg = 0;
+const tend = 4;
+const dt = 0.001 * T0;
+const Tobs = 0.05 * T0;
+const digit = 3;
+const g = 9.81;
+const R = 0.248;
+const w0 = Math.sqrt(g / R);
+const N = Math.round((tend - tbeg) / dt);
+
+const amplitudes = [
+  0.1, 0.2, 0.3, 0.4, 0.5,
+  0.6, 0.7, 0.8, 0.9, 0.99,
+];
+
+
+/* simulate one amplitude */
+
+function simulate(a) {
+  const A = a * Math.PI;
+
+  const data_the = [];
+  const data_num = [];
+
+  let tobs = 0;
+  let t = tbeg;
+  let w_num = 0;
+  let q_num = A;
+
+  let max_dev = 0;
+  let sum_sq = 0;
+  let n_samp = 0;
+
+  for(let n = 0; n <= N; n++) {
+    const q_the = A * Math.cos(w0 * t);
+
+    if(tobs >= Tobs || tobs == 0) {
+      data_the.push({ x: t, y: q_the });
+      data_num.push({ x: t, y: q_num });
+      tobs = 0;
+    }
+
+    const dev = Math.abs(q_the - q_num);
+    max_dev = Math.max(max_dev, dev);
+    sum_sq += dev * dev;
+    n_samp++;
+
+    w_num += -(g / R) * Math.sin(q_num) * dt;
+    q_num += w_num * dt;
+
+    t += dt;
+    tobs += dt;
+  }
+
+  return {
+    a: a,
+    A: A,
+    data_the: data_the,
+    data_num: data_num,
+    max_dev: max_dev,
+    rms: Math.sqrt(sum_sq / n_samp),
+  };
+}
+
+
+/* summary table */
+
+function addSummary(results) {
+  const cnt = document.getElementById("summary");
+
+  const table = document.createElement("table");
+  table.className = "pendulum-table";
+
+  const thead = document.createElement("thead");
+  thead.innerHTML = [
+    "<tr>",
+    "<th>a</th>",
+    "<th>A (deg)</th>",
+    "<th>max |&Delta;&theta;| (rad)</th>",
+    "<th>RMS |&Delta;&theta;| (rad)</th>",
+    "</tr>",
+  ].join("");
+  table.append(thead);
+
+  const tbody = document.createElement("tbody");
+  for(const res of results) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = [
+      "<td>" + res.a.toFixed(2) + "</td>",
+      "<td>" + (res.A * 180 / Math.PI).toFixed(2) + "</td>",
+      "<td>" + res.max_dev.toFixed(3) + "</td>",
+      "<td>" + res.rms.toFixed(3) + "</td>",
+    ].join("");
+    tbody.append(tr);
+  }
+  table.append(tbody);
+
+  cnt.append(table);
+}
+
+
+/* one chart per amplitude */
+
+function addCase(res) {
+  const a = res.a;
+  const A = res.A;
+
+  const section = document.createElement("section");
+  section.className = "pendulum-case";
+
+  const title = document.createElement("h2");
+  title.textContent = "a = " + a.toFixed(2) +
+    " (A = " + (A * 180 / Math.PI).toFixed(2) + "\u00b0)";
+  section.append(title);
+
+  const row = document.createElement("div");
+  row.className = "pendulum-row";
+
+  const consoleBox = document.createElement("div");
+  consoleBox.className = "pendulum-console";
+
+  const consoles = CLI.create("150px");
+  const cli = consoles.el;
+  consoles.setTitle("a = " + a.toFixed(2));
+  consoleBox.append(cli);
+
+  const chartBox = document.createElement("div");
+  chartBox.className = "pendulum-chart";
+
+  const can = document.createElement("canvas");
+  chartBox.append(can);
+
+  row.append(consoleBox);
+  row.append(chartBox);
+  section.append(row);
+
+  document.getElementById("cases").append(section);
+
+  consoles.log("t\t\u03b8_the\t\u03b8_num");
+  for(let i = 0; i < res.data_the.length; i++) {
+    const t_str = res.data_the[i].x.toFixed(digit);
+    const q_the_str = res.data_the[i].y.toFixed(digit);
+    const q_num_str = res.data_num[i].y.toFixed(digit);
+    consoles.log(t_str + "\t" + q_the_str + "\t" + q_num_str);
+  }
+
+  const config = {
+    type: 'scatter',
+
+    data: {
+      datasets: [
+        {
+          label: "\u03b8_the (small angle)",
+          data: res.data_the,
+          showLine: true,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          borderColor: "#4f81bd",
+          backgroundColor: "#4f81bd",
+        },
+
+        {
+          label: "\u03b8_num (nonlinear)",
+          data: res.data_num,
+          showLine: true,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          borderColor: "#e67e22",
+          backgroundColor: "#e67e22",
+        },
+      ],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+
+      scales: {
+
+        x: {
+          type: 'linear',
+          title: {
+            display: true,
+            text: 't (s)',
+            font: { size: 14, },
+          },
+        },
+
+        y: {
+          type: 'linear',
+          title: {
+            display: true,
+            text: '\u03b8 (rad)',
+            font: { size: 14, },
+          },
+        },
+
+      },
+
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ctx.dataset.label + ": " +
+                ctx.parsed.y.toFixed(3) + " rad";
+            },
+          },
+        },
+      },
+    },
+  };
+
+  new Chart(can, config);
+}
+
+
+/* run all amplitudes */
+
+const results = amplitudes.map(simulate);
+addSummary(results);
+for(const res of results) {
+  addCase(res);
+}
+
+</script>
+
+
+<!-- code ends -->
+</body>
+</html>
